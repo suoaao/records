@@ -44,8 +44,6 @@ def test_failing_transaction_self_managed(db):
         conn.query('INSERT INTO foo VALUES (42)')
         conn.query('INSERT INTO foo VALUES (43)')
         raise ValueError()
-        tx.commit()
-        conn.query('INSERT INTO foo VALUES (44)')
     except ValueError:
         tx.rollback()
     finally:
