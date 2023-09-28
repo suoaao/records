@@ -17,9 +17,7 @@ def isexception(obj):
     """
     if isinstance(obj, Exception):
         return True
-    if isclass(obj) and issubclass(obj, Exception):
-        return True
-    return False
+    return bool(isclass(obj) and issubclass(obj, Exception))
 
 
 class Record(object):
@@ -42,7 +40,7 @@ class Record(object):
         return self._values
 
     def __repr__(self):
-        return '<Record {}>'.format(self.export('json')[1:-1])
+        return f"<Record {self.export('json')[1:-1]}>"
 
     def __getitem__(self, key):
         # Support for index-based lookup.
@@ -53,10 +51,10 @@ class Record(object):
         if key in self.keys():
             i = self.keys().index(key)
             if self.keys().count(key) > 1:
-                raise KeyError("Record contains multiple '{}' fields.".format(key))
+                raise KeyError(f"Record contains multiple '{key}' fields.")
             return self.values()[i]
 
-        raise KeyError("Record contains no '{}' field.".format(key))
+        raise KeyError(f"Record contains no '{key}' field.")
 
     def __getattr__(self, key):
         try:
@@ -106,7 +104,7 @@ class RecordCollection(object):
         self.pending = True
 
     def __repr__(self):
-        return '<RecordCollection size={} pending={}>'.format(len(self), self.pending)
+        return f'<RecordCollection size={len(self)} pending={self.pending}>'
 
     def __iter__(self):
         """Iterate over all rows, consuming the underlying generator
@@ -152,10 +150,7 @@ class RecordCollection(object):
                 break
 
         rows = self._all_rows[key]
-        if is_int:
-            return rows[0]
-        else:
-            return RecordCollection(iter(rows))
+        return rows[0] if is_int else RecordCollection(iter(rows))
 
     def __len__(self):
         return len(self._all_rows)
@@ -172,7 +167,7 @@ class RecordCollection(object):
 
         # If the RecordCollection is empty, just return the empty set
         # Check number of rows by typecasting to list
-        if len(list(self)) == 0:
+        if not list(self):
             return data
 
         # Set the column names as headers on Tablib Dataset.
@@ -272,7 +267,7 @@ class Database(object):
         self.close()
 
     def __repr__(self):
-        return '<Database open={}>'.format(self.open)
+        return f'<Database open={self.open}>'
 
     def get_table_names(self, internal=False):
         """Returns a list of table names for the connected database."""
@@ -348,7 +343,7 @@ class Connection(object):
         self.close()
 
     def __repr__(self):
-        return '<Connection open={}>'.format(self.open)
+        return f'<Connection open={self.open}>'
 
     def query(self, query, fetchall=False, **params):
         """Executes the given SQL query against the connected Database.
@@ -381,11 +376,11 @@ class Connection(object):
 
         # If path doesn't exists
         if not os.path.exists(path):
-            raise IOError("File '{}' not found!".format(path))
+            raise IOError(f"File '{path}' not found!")
 
         # If it's a directory
         if os.path.isdir(path):
-            raise IOError("'{}' is a directory!".format(path))
+            raise IOError(f"'{path}' is a directory!")
 
         # Read the given .sql file into memory.
         with open(path) as f:
@@ -401,11 +396,11 @@ class Connection(object):
 
          # If path doesn't exists
         if not os.path.exists(path):
-            raise IOError("File '{}'' not found!".format(path))
+            raise IOError(f"File '{path}'' not found!")
 
         # If it's a directory
         if os.path.isdir(path):
-            raise IOError("'{}' is a directory!".format(path))
+            raise IOError(f"'{path}' is a directory!")
 
         # Read the given .sql file into memory.
         with open(path) as f:
@@ -475,8 +470,8 @@ Notes:
         arguments['<params>'].append(format)
         format = None
     if format and format not in supported_formats:
-        print('%s format not supported.' % format)
-        print('Supported formats are %s.' % formats_lst)
+        print(f'{format} format not supported.')
+        print(f'Supported formats are {formats_lst}.')
         exit(62)
 
     # Can't send an empty list if params aren't expected.
